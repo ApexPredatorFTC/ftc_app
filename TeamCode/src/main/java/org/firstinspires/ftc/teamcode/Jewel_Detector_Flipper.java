@@ -70,18 +70,24 @@ public class Jewel_Detector_Flipper extends LinearOpMode {
         sensorColor = hardwareMap.get(ColorSensor.class, "js");
         sensorDistance = hardwareMap.get(DistanceSensor.class, "js");
         sensorColor.enableLed(false);
+
+
         waitForStart();
 
         while(opModeIsActive()){
             // Show the elapsed game time and wheel power.
             int blueValue = sensorColor.blue();
             int redValue = sensorColor.red();
-            if(blueValue>redValue){
+            if(blueValue>(redValue*2)){
                 //telemetry.addData("Blue: "  + blueValue);
                 servo.setPosition(1);
             }
-            else{
+            else if ((blueValue*2)<redValue){
                 servo.setPosition(0);
+            }
+
+            else{
+                servo.setPosition(0.5 );
             }
             telemetry.addData("Color Values", "Blue: " + blueValue + " Red: " + redValue);
             telemetry.addData("Status", "Run Time: " + runtime.toString());
