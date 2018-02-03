@@ -18,22 +18,21 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+    /**
+     * Created by Admin on 11/29/2017.
+     */
+    @Autonomous(name = "CornerRed", group = "")
+    public class CornerRed extends LinearOpMode {
+        boolean on = true;
 
-/**
- * Created by Admin on 11/29/2017.
- */
-@Autonomous(name = "CornerBlue", group = "")
-public class CornerBlue extends LinearOpMode {
-    boolean on = true;
+        DcMotor motor_left;
+        DcMotor motor_right;
 
-    DcMotor motor_left;
-    DcMotor motor_right;
-
-    DcMotor motor_arm;
-    Servo Servo_L;
-    Servo Servo_R;
-    float x = 0;
-    float y = 0;
+        DcMotor motor_arm;
+        Servo Servo_L;
+        Servo Servo_R;
+        float x = 0;
+        float y = 0;
 
 
         public static final String TAG = "Vuforia VuMark Sample";
@@ -145,27 +144,27 @@ public class CornerBlue extends LinearOpMode {
 
                     }
                     //LEFT
-                    if (vuMark == RelicRecoveryVuMark.LEFT) {
-                        turn(14, 0.3);
+                    if (vuMark == RelicRecoveryVuMark.RIGHT) {
+                        turn(-7.25, 0.3);
 
                         sleep(1000);
                         driveForward(3.3, 0.3);
                         sleep(500);
                         openClaw();
-                        driveForward(-0.1, 1);
+                        driveForward(-0.4, 1);
                         sleep(500);
                         resetEncoders();
-                        turn(-30, .5);
+                        turn(30, .5);
                         sleep(1000);
-                        driveForward(-0.4, 1);
+                        driveForward(-0.2, 1);
                         sleep(1000);
                         resetEncoders();
                         on = false;
                     }
 
                     //RIGHT
-                    else if (vuMark == RelicRecoveryVuMark.RIGHT) {
-                        turn(22.5, 0.3);
+                    else if (vuMark == RelicRecoveryVuMark.LEFT) {
+                        turn(-22.5, 0.3);
 
                         sleep(1000);
                         driveForward(3.4, 0.3);
@@ -173,24 +172,28 @@ public class CornerBlue extends LinearOpMode {
                         openClaw();
                         driveForward(-0.4, 1);
                         sleep(1000);
+                        resetEncoders();
+                        turn(30, .5);
+                        sleep(1000);
                         driveForward(1, .3);
+                        sleep(500);
                         driveForward(-0.4, 1);
                         resetEncoders();
                         on = false;
                     }
                     //CENTER
                     else if (vuMark == RelicRecoveryVuMark.CENTER) {
-                        turn(18.5, 0.3);
+                        turn(-15.5, 0.3);
                         sleep(1000);
                         driveForward(3.4, 0.3);
                         sleep(1000);
                         openClaw();
-                        driveForward(-0.1, 1);
+                        driveForward(-0.4, 1);
                         sleep(500);
                         resetEncoders();
-                        turn(-30, .5);
+                        turn(30, .5);
                         sleep(1000);
-                        driveForward(-0.4, 1);
+                        driveForward(-0.2, 1);
                         sleep(1000);
                         resetEncoders();
                         on = false;
@@ -219,7 +222,6 @@ public class CornerBlue extends LinearOpMode {
                 telemetry.addData("Left Encoder", motor_left.getCurrentPosition());
                 telemetry.addData("Right Encoder", motor_right.getCurrentPosition());
                 telemetry.update();
-
             }
 
             motor_left.setPower(0);
@@ -227,25 +229,25 @@ public class CornerBlue extends LinearOpMode {
 
         }
 
-    public void turn(double degrees, double power) {
-        //-2500 to both motors is 180 degree turn
-        //-13.8 encoder counts is one degree
-        motor_left.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motor_right.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        public void turn(double degrees, double power) {
+            //-2500 to both motors is 180 degree turn
+            //-13.8 encoder counts is one degree
+            motor_left.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            motor_right.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        double position = (-13.8 * degrees);
-        motor_left.setTargetPosition((int) position + motor_left.getCurrentPosition());
-        motor_right.setTargetPosition((int) (position)+ motor_right.getCurrentPosition());
+            double position = (-13.8 * degrees);
+            motor_left.setTargetPosition((int) position + motor_left.getCurrentPosition());
+            motor_right.setTargetPosition((int) (position)+ motor_right.getCurrentPosition());
 
 
-        if (position < 0) {
-            motor_left.setPower(power);
-            motor_right.setPower(power);
-        }
-        else if(position > 0) {
-            motor_left.setPower(-power);
-            motor_right.setPower(-power);
-        }
+            if (position < 0) {
+                motor_left.setPower(power);
+                motor_right.setPower(power);
+            }
+            else if(position > 0) {
+                motor_left.setPower(-power);
+                motor_right.setPower(-power);
+            }
         }
 
         public void resetEncoders() {
@@ -269,9 +271,9 @@ public class CornerBlue extends LinearOpMode {
             Servo_R.setPosition(1);
             Servo_L.setPosition(0);
         }
-    String format(OpenGLMatrix transformationMatrix) {
-        return (transformationMatrix != null) ? transformationMatrix.formatAsTransform() : "null";
-    }
+        String format(OpenGLMatrix transformationMatrix) {
+            return (transformationMatrix != null) ? transformationMatrix.formatAsTransform() : "null";
+        }
 
     }
 
