@@ -1,48 +1,74 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.Func;
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
+import org.firstinspires.ftc.robotcore.external.navigation.VuMarkInstanceId;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import java.util.Locale;
-
 /**
  * Created by Admin on 1/31/2018.
  */
-@TeleOp
-public class Sheesh extends LinearOpMode {
+@Autonomous
+public class RedA extends LinearOpMode {
     boolean on=true;
     BNO055IMU imu;
     DcMotor frontLeft;
     DcMotor backLeft;
     DcMotor frontRight;
     DcMotor backRight;
-    //DcMotor rightSpin;
-    //DcMotor leftSpin;
+    DcMotor rightSpin;
+    DcMotor leftSpin;
     //DcMotor lifter;
     // State used for updating telemetry
     Orientation angles;
+    ColorSensor sensorColor;
+    DistanceSensor sensorDistance;
+    Servo ColorServo;
+    Servo DownServo;
 
-    static final double COUNTS_PER_INCH = 104;
+    public static final String TAG = "Vuforia VuMark Sample";
+
+    OpenGLMatrix lastLocation = null;
+    VuforiaLocalizer vuforia;
+
+    static final double COUNTS_PER_INCH = 115.555;
     static final double P_DRIVE_COEFF = .01;
     static final double HEADING_THRESHOLD = 1;      // As tight as we can make it with an integer gyro
-    static final double P_TURN_COEFF = 0.017;
+    static final double P_TURN_COEFF = 0.008;
     @Override public void runOpMode() {
         frontLeft = hardwareMap.dcMotor.get("frontLeft");
         backLeft = hardwareMap.dcMotor.get("backLeft");
         frontRight = hardwareMap.dcMotor.get("frontRight");
         backRight = hardwareMap.dcMotor.get("backRight");
-        //rightSpin = hardwareMap.get(DcMotor.class, "rightSpin");
-        //leftSpin = hardwareMap.get(DcMotor.class, "leftSpin");
+        rightSpin = hardwareMap.get(DcMotor.class, "rightSpin");
+        leftSpin = hardwareMap.get(DcMotor.class, "leftSpin");
         // lifter = hardwareMap.get(DcMotor.class, "lifter");
+        ColorServo = hardwareMap.get(Servo.class, "ColorServo2");
+        DownServo = hardwareMap.get(Servo.class, "DownServo2");
+        sensorColor = hardwareMap.get(ColorSensor.class, "js2");
+        sensorDistance = hardwareMap.get(DistanceSensor.class, "js2");
+        sensorColor.enableLed(false);
 
         frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -54,23 +80,131 @@ public class Sheesh extends LinearOpMode {
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.loggingEnabled = true;
-        parameters.loggingTag     = "IMU";
+
+        BNO055IMU.Parameters imuparameters = new BNO055IMU.Parameters();
+        imuparameters.loggingEnabled = true;
+        imuparameters.loggingTag = "IMU";
         imu = hardwareMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parameters);
+        imu.initialize(imuparameters);
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+        parameters.vuforiaLicenseKey = "AWckC9P/////AAAAGQAbrzfWpEF1qYwCpiUOr7RVSfW6jrhfxzTHAroEzCmsYWamxL3Ouv5nHuVtyVDiu0lzb1kWGfkCs5wTzyQIIiKDNYP70491X/5gnZgwXxEj2EkIM5u/ek+G14ilZlDIeaCh6nMXglX8Q/NVXfK1ox33KR68lYMIBWcJdLmLbKPUWylHXXSvFLHpUSvyvpXKwgovzlxtmXTCcYqvMoVwTBWcHPazaupqXBxp4aeF1w9xvIr5GYdq5kzzL7Vs/AUH5QU5PG/0UFLlM+frXCdJcWzLK0u8X+CyNIJjMskZBfBW+9bGC0uynIP4gP94HmGdviuoTtPuWXUTJrvCsrPHpD3rXDt6o6BIiNGQs28a3W2p";
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
+        this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+        /**
+         * Load the data set containing the VuMarks for Relic Recovery. There's only one trackable
+         * in this data set: all three of the VuMarks in the game were created from this one template,
+         * but differ in their instance id information.
+         * @see VuMarkInstanceId
+         */
+        VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+        VuforiaTrackable relicTemplate = relicTrackables.get(0);
+        relicTemplate.setName("relicVuMarkTemplate");
         //composeTelemetry();
+
+        DownServo.setPosition(1);
+        ColorServo.setPosition(0);
+        relicTrackables.activate();
+        telemetry.addData("Status", "Initialized");
+        telemetry.update();
         waitForStart();
 
-        while(opModeIsActive() && on == true){
+        while (opModeIsActive() && on == true) {
+            RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
+            ColorServo.setPosition(.7);
+            sleep(500);
+            DownServo.setPosition(.7);
+            Sensor();
+            sleep(2000);
+            DownServo.setPosition(.2);
+            sleep(500);
+            ColorServo.setPosition(0);
+            if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
 
-            GyroTurn(30);
 
-            on=false;
+                /* Found an instance of the template. In the actual game, you will probably
+                 * loop until this condition occurs, then move on to act accordingly depending
+                 * on which VuMark was visible. */
+                telemetry.addData("VuMark", "%s visible", vuMark);
 
+                /* For fun, we also exhibit the navigational pose. In the Relic Recovery game,
+                 * it is perhaps unlikely that you will actually need to act on this pose information, but
+                 * we illustrate it nevertheless, for completeness. */
+                OpenGLMatrix pose = ((VuforiaTrackableDefaultListener) relicTemplate.getListener()).getPose();
+                telemetry.addData("Pose", pose);
+
+                /* We further illustrate how to decompose the pose into useful rotational and
+                 * translational components */
+                if (pose != null) {
+                    VectorF trans = pose.getTranslation();
+                    Orientation rot = Orientation.getOrientation(pose, AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
+
+                    // Extract the X, Y, and Z components of the offset of the target relative to the robot
+                    double tX = trans.get(0);
+                    double tY = trans.get(1);
+                    double tZ = trans.get(2);
+
+                    // Extract the rotational components of the target relative to the robot
+                    double rX = rot.firstAngle;
+                    double rY = rot.secondAngle;
+                    double rZ = rot.thirdAngle;
+
+                    telemetry.addData("tX", tX);
+                    telemetry.addData("tY", tY);
+                    telemetry.addData("tZ", tZ);
+
+                    telemetry.addData("rX", rX);
+                    telemetry.addData("rY", rY);
+                    telemetry.addData("rZ", rZ);
+
+                }
+                if (vuMark != RelicRecoveryVuMark.CENTER) {
+                    Move(37, .5, 0);    //This moves it off the platform
+                    sleep(500);
+                    GyroTurn(91.5);
+                    sleep(500);
+                    Move(14, .2, 0);    //Move to the Crypto Box
+                    sleep(500);
+                    Outtake();
+
+                    Move(12, .5, 180);  //Moves Back
+                    sleep(500);
+                    on = false;
+                }
+                if (vuMark != RelicRecoveryVuMark.LEFT) {
+                    //Left
+                    Move(37, .5, 0);    //This moves it off the platform
+                    sleep(500);
+                    GyroTurn(91.5);
+                    sleep(500);
+                    Move(8, .2, 90);      //Move to the Crypto Box
+                    sleep(500);
+                    Move(9, .2, 0);         //Moves to Left
+                    sleep(500);
+                    Outtake();
+                    sleep(1500);
+                    Move(10, .5, 180);      //Moves Back
+                    sleep(500);
+                    on = false;
+                }
+                if (vuMark != RelicRecoveryVuMark.RIGHT){
+                    Move(37, .5, 0);  //This moves it off the platform
+                    sleep(500);
+                    GyroTurn(91.5);
+                    sleep(500);
+                    Move(8, .2, 270);
+                    sleep(500);
+                    Move(20, .2, 0);
+                    sleep(500);
+                    Outtake();
+                    sleep(1500);
+                    Move(10, .5, 180);  //Moves Back
+                    sleep(500);
+                    on = false;
+                }
+            }
         }
-
-}
+    }
     public double getError(double targetAngle) {
 
         double robotError;
@@ -237,11 +371,14 @@ public class Sheesh extends LinearOpMode {
                 double max1 = Math.max(Math.abs(frontLeftSpeed), Math.abs(frontRightSpeed));
                 double max2 = Math.max(Math.abs(backRightSpeed), Math.abs(backLeftSpeed));
                 double max = Math.max(max1, max2);
-                if (max > 1.0) {
-                    frontLeftSpeed /= max;
-                    frontRightSpeed /= max;
-                    backRightSpeed /= max;
-                    backLeftSpeed /= max;
+
+                //0.7 is motor max speed for turning
+                if (max > .7) {
+                    frontLeftSpeed = 0.7*(frontLeftSpeed/max);
+                    frontRightSpeed = 0.7*(frontRightSpeed/max);
+                    backLeftSpeed = 0.7*(backRightSpeed/max);
+                    backRightSpeed = 0.7*(backLeftSpeed/max);
+
 
                 }
 
@@ -324,7 +461,7 @@ public class Sheesh extends LinearOpMode {
 
             double turnError;
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            double initialError = getError(0);
+            degrees = degrees - angles.firstAngle;
 
             boolean turn = false;
 
@@ -336,10 +473,9 @@ public class Sheesh extends LinearOpMode {
             while (opModeIsActive() && (turn == false)) {
                 angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
-                turnError = getError(degrees) + initialError;
+                turnError = getError(degrees);
 
-                telemetry.addData("turnerror", turnError);
-                telemetry.update();
+
 
                 if (Math.abs(turnError) <= HEADING_THRESHOLD) {
                     turn = true;
@@ -347,10 +483,10 @@ public class Sheesh extends LinearOpMode {
 
                     double steer = getSteer(turnError, P_TURN_COEFF);
 
-                    double frontLeftSpeed = (steer);
-                    double frontRightSpeed = (steer);
-                    double backRightSpeed = (steer);
-                    double backLeftSpeed = (steer);
+                    double frontLeftSpeed = -(steer);
+                    double frontRightSpeed = -(steer);
+                    double backRightSpeed = -(steer);
+                    double backLeftSpeed = -(steer);
 
                     double max1 = Math.max(Math.abs(frontLeftSpeed), Math.abs(frontRightSpeed));
                     double max2 = Math.max(Math.abs(backRightSpeed), Math.abs(backLeftSpeed));
@@ -367,6 +503,13 @@ public class Sheesh extends LinearOpMode {
                     frontRight.setPower(frontRightSpeed);
                     backLeft.setPower(backLeftSpeed);
                     backRight.setPower(backRightSpeed);
+
+                    telemetry.addData("heading", angles.firstAngle);
+                    telemetry.addData("turnerror", turnError);
+                    telemetry.update();
+
+                    idle();
+
                 }
             }
             frontRight.setPower(0);
@@ -375,7 +518,48 @@ public class Sheesh extends LinearOpMode {
             backRight.setPower(0);
         }
     }
+    public void Intake() {
+        leftSpin.setPower(-.2);
+        rightSpin.setPower(.2);
+    }
+    public void Outtake() {
+        leftSpin.setPower(.4);
+        rightSpin.setPower(-.4);
 
+        sleep(1000);
+
+        leftSpin.setPower(0);
+        rightSpin.setPower(0);
+    }
+    public void Sensor() {
+
+        int blueValue = sensorColor.blue();
+        int redValue = sensorColor.red();
+
+        blueValue = sensorColor.blue();
+        redValue = sensorColor.red();
+        //composeTelemetry();
+        telemetry.addData("Blue: ", blueValue);
+        telemetry.addData("Red: ", redValue);
+        telemetry.update();
+
+        // Show the elapsed game time and wheel power.
+        if(redValue > blueValue){
+            ColorServo.setPosition(.2);
+            sleep(500);//Forwards
+        }
+        else if (blueValue > redValue){
+            ColorServo.setPosition(.7);
+            sleep(500); //Backwards
+
+        }
+    }
+    public void DropTheServo(){
+        DownServo.setPosition(1);
+    }
+    public void LiftTheServo(){
+        DownServo.setPosition(0);
+    }
 
     //----------------------------------------------------------------------------------------------
     // Formatting
