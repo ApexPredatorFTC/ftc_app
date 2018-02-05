@@ -540,7 +540,7 @@ public class BlueB extends LinearOpMode {
 
         int blueValue = sensorColor.blue();
         int redValue = sensorColor.red();
-
+        sleep(2000);
         blueValue = sensorColor.blue();
         redValue = sensorColor.red();
         //composeTelemetry();

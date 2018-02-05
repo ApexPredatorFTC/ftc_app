@@ -102,8 +102,9 @@ public class RedA extends LinearOpMode {
         relicTemplate.setName("relicVuMarkTemplate");
         //composeTelemetry();
 
-        DownServo.setPosition(1);
-        ColorServo.setPosition(0);
+        DownServo.setPosition(.2);  //Straight up in the air
+        ColorServo.setPosition(.1);
+
         relicTrackables.activate();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -111,14 +112,15 @@ public class RedA extends LinearOpMode {
 
         while (opModeIsActive() && on == true) {
             RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
-            ColorServo.setPosition(.7);
+            ColorServo.setPosition(.6);
             sleep(500);
-            DownServo.setPosition(.7);
+            DownServo.setPosition(.6);
+            sleep(1000);
             Sensor();
             sleep(2000);
             DownServo.setPosition(.2);
             sleep(500);
-            ColorServo.setPosition(0);
+            ColorServo.setPosition(.2);
             if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
 
 
@@ -532,10 +534,10 @@ public class RedA extends LinearOpMode {
         rightSpin.setPower(0);
     }
     public void Sensor() {
-
+        sleep(2000);
         int blueValue = sensorColor.blue();
         int redValue = sensorColor.red();
-
+        sleep(2000);
         blueValue = sensorColor.blue();
         redValue = sensorColor.red();
         //composeTelemetry();
