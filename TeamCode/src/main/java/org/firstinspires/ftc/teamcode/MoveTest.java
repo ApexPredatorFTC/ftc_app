@@ -30,7 +30,7 @@ import java.util.Locale;
  * Created by Admin on 1/31/2018.
  */
 @Autonomous
-public class BlueA extends LinearOpMode {
+public class MoveTest extends LinearOpMode {
     boolean on=true;
     BNO055IMU imu;
     DcMotor frontLeft;
@@ -104,25 +104,14 @@ public class BlueA extends LinearOpMode {
 
         DownServo.setPosition(1);
         ColorServo.setPosition(0);
-
         relicTrackables.activate();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
         waitForStart();
 
         while (opModeIsActive() && on == true) {
-            ColorServo.setPosition(0);
-            sleep(500);
-            ColorServo.setPosition(1);
-            sleep(500);
-            ColorServo.setPosition(0);
-            sleep(500);
-            ColorServo.setPosition(1);
-            sleep(500);
-            ColorServo.setPosition(0);
-            sleep(500);
             RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
-            ColorServo.setPosition(.30);
+            /*ColorServo.setPosition(.30);
             sleep(500);
             DownServo.setPosition(.3);
             Sensor();
@@ -136,85 +125,48 @@ public class BlueA extends LinearOpMode {
                 /* Found an instance of the template. In the actual game, you will probably
                  * loop until this condition occurs, then move on to act accordingly depending
                  * on which VuMark was visible. */
-                telemetry.addData("VuMark", "%s visible", vuMark);
+            telemetry.addData("VuMark", "%s visible", vuMark);
 
                 /* For fun, we also exhibit the navigational pose. In the Relic Recovery game,
                  * it is perhaps unlikely that you will actually need to act on this pose information, but
                  * we illustrate it nevertheless, for completeness. */
-                OpenGLMatrix pose = ((VuforiaTrackableDefaultListener) relicTemplate.getListener()).getPose();
-                telemetry.addData("Pose", pose);
+            OpenGLMatrix pose = ((VuforiaTrackableDefaultListener) relicTemplate.getListener()).getPose();
+            telemetry.addData("Pose", pose);
 
                 /* We further illustrate how to decompose the pose into useful rotational and
                  * translational components */
-                if (pose != null) {
-                    VectorF trans = pose.getTranslation();
-                    Orientation rot = Orientation.getOrientation(pose, AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
+            if (pose != null) {
+                VectorF trans = pose.getTranslation();
+                Orientation rot = Orientation.getOrientation(pose, AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
 
-                    // Extract the X, Y, and Z components of the offset of the target relative to the robot
-                    double tX = trans.get(0);
-                    double tY = trans.get(1);
-                    double tZ = trans.get(2);
+                // Extract the X, Y, and Z components of the offset of the target relative to the robot
+                double tX = trans.get(0);
+                double tY = trans.get(1);
+                double tZ = trans.get(2);
 
-                    // Extract the rotational components of the target relative to the robot
-                    double rX = rot.firstAngle;
-                    double rY = rot.secondAngle;
-                    double rZ = rot.thirdAngle;
+                // Extract the rotational components of the target relative to the robot
+                double rX = rot.firstAngle;
+                double rY = rot.secondAngle;
+                double rZ = rot.thirdAngle;
 
-                    telemetry.addData("tX", tX);
-                    telemetry.addData("tY", tY);
-                    telemetry.addData("tZ", tZ);
+                telemetry.addData("tX", tX);
+                telemetry.addData("tY", tY);
+                telemetry.addData("tZ", tZ);
 
-                    telemetry.addData("rX", rX);
-                    telemetry.addData("rY", rY);
-                    telemetry.addData("rZ", rZ);
+                telemetry.addData("rX", rX);
+                telemetry.addData("rY", rY);
+                telemetry.addData("rZ", rZ);
 
-                }
-                if (vuMark == RelicRecoveryVuMark.CENTER) {
-                    Move(37, .4, 0);    //This moves it off the platform
-
-                    GyroTurn(-90);
-
-                    Move(13.5, .1, 0);    //Move to the Crypto Box
-
-                    Outtake();
-                    sleep(2500);
-                    Move(13.5, .1, 180);  //Moves Back
-                    stopOuttake();
-
-                    on = false;
-                } else if (vuMark == RelicRecoveryVuMark.LEFT) {
-                    //Left
-                    Move(37, .4, 0);    //This moves it off the platform
-                    sleep(500);
-                    GyroTurn(-90);
-                    sleep(500);
-                    Move(11.5, .2, 270);      //Move left
-                    sleep(500);
-                    Move(13.5, .1, 0);         //Moves to box
-                    sleep(1000);
-                    Outtake();
-                    sleep(2500);
-                    Move(13.5, .1, 180);      //Moves Back
-                    stopOuttake();
-                    sleep(500);
-                    on = false;
-                } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
-                    Move(37, .4, 0);  //This moves it off the platform
-                    sleep(500);
-                    GyroTurn(-90);
-                    sleep(500);
-                    Move(9, .2, 90);  // moves right
-                    sleep(500);
-                    Move(13.5, .05, 0); //moves toward box
-                    sleep(1000);
-                    Outtake();
-                    sleep(2500);
-                    Move(10, .1, 180);  //Moves Back
-                    stopOuttake();
-                    sleep(500);
-                    on = false;
-                }
             }
+           Move(20, 1, 0);
+            GyroTurn(90);
+            Move(20, .75, 90);
+            GyroTurn(90);
+            Move(20, .5, 180);
+            GyroTurn(90);
+            Move(20, .1, 270);
+
+            on = false;
         }
     }
     public double getError(double targetAngle) {
@@ -470,7 +422,9 @@ public class BlueA extends LinearOpMode {
 
     public void GyroTurn(double degrees) {
         if (opModeIsActive()) {
+
             resetEncoders();
+
             double turnError;
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             degrees = degrees - angles.firstAngle;
@@ -528,14 +482,17 @@ public class BlueA extends LinearOpMode {
             backLeft.setPower(0);
             frontLeft.setPower(0);
             backRight.setPower(0);
+            frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            sleep(500);
 
             frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-
-
         }
     }
     public void Intake() {
@@ -554,9 +511,9 @@ public class BlueA extends LinearOpMode {
 
         int blueValue = sensorColor.blue();
         int redValue = sensorColor.red();
-        sleep(1000);
+        sleep(2000);
         blueValue = sensorColor.blue();
-         redValue = sensorColor.red();
+        redValue = sensorColor.red();
         //composeTelemetry();
         telemetry.addData("Blue: ", blueValue);
         telemetry.addData("Red: ", redValue);

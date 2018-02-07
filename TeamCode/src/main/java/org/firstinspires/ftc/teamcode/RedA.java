@@ -121,6 +121,7 @@ public class RedA extends LinearOpMode {
             DownServo.setPosition(.2);
             sleep(500);
             ColorServo.setPosition(.2);
+
             if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
 
 
@@ -160,7 +161,7 @@ public class RedA extends LinearOpMode {
                     telemetry.addData("rZ", rZ);
 
                 }
-                if (vuMark != RelicRecoveryVuMark.CENTER) {
+                if (vuMark == RelicRecoveryVuMark.CENTER) {
                     Move(37, .5, 0);    //This moves it off the platform
                     sleep(500);
                     GyroTurn(91.5);
@@ -173,7 +174,7 @@ public class RedA extends LinearOpMode {
                     sleep(500);
                     on = false;
                 }
-                if (vuMark != RelicRecoveryVuMark.LEFT) {
+                if (vuMark == RelicRecoveryVuMark.LEFT) {
                     //Left
                     Move(37, .5, 0);    //This moves it off the platform
                     sleep(500);
@@ -184,12 +185,12 @@ public class RedA extends LinearOpMode {
                     Move(9, .2, 0);         //Moves to Left
                     sleep(500);
                     Outtake();
-                    sleep(1500);
+                    //sleep(1500);
                     Move(10, .5, 180);      //Moves Back
                     sleep(500);
                     on = false;
                 }
-                if (vuMark != RelicRecoveryVuMark.RIGHT){
+                if (vuMark == RelicRecoveryVuMark.RIGHT){
                     Move(37, .5, 0);  //This moves it off the platform
                     sleep(500);
                     GyroTurn(91.5);
@@ -199,7 +200,7 @@ public class RedA extends LinearOpMode {
                     Move(20, .2, 0);
                     sleep(500);
                     Outtake();
-                    sleep(1500);
+                    //sleep(1500);
                     Move(10, .5, 180);  //Moves Back
                     sleep(500);
                     on = false;

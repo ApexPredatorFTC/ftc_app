@@ -133,6 +133,11 @@ public class OmniTeleOP extends LinearOpMode{
                 }
             }
 
+            if(gamepad2.right_trigger == 1){
+                DownServo.setPosition(1);
+                ColorServo.setPosition(0);
+            }
+
 
 
             //Set powers
