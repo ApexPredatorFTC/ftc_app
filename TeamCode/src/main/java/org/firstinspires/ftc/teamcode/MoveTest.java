@@ -158,13 +158,11 @@ public class MoveTest extends LinearOpMode {
                 telemetry.addData("rZ", rZ);
 
             }
-           Move(20, 1, 0);
-            GyroTurn(90);
-            Move(20, .75, 90);
-            GyroTurn(90);
-            Move(20, .5, 180);
-            GyroTurn(90);
-            Move(20, .1, 270);
+            Move(20, 1, 0);
+            //resetEncoders();
+            GyroTurn(180);
+
+            Move(40,.1,0);
 
             on = false;
         }
@@ -189,9 +187,11 @@ public class MoveTest extends LinearOpMode {
             direction = direction * Math.PI / 180;
 
             //Reset Encoder Counts 0
-            resetEncoders();
+
             double yDist = Math.cos(direction) * distance;
             double xDist = Math.sin(direction)* distance;
+
+
 
             double ySpeed = Math.cos(direction) * speed;
             double xSpeed = Math.sin(direction)* speed;
@@ -257,6 +257,7 @@ public class MoveTest extends LinearOpMode {
                 telemetry.addData("Heading", angles.firstAngle);
                 telemetry.update();
 
+                idle();
             }
 
             // Stop all motion;
@@ -423,7 +424,7 @@ public class MoveTest extends LinearOpMode {
     public void GyroTurn(double degrees) {
         if (opModeIsActive()) {
 
-            resetEncoders();
+
 
             double turnError;
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
@@ -482,17 +483,13 @@ public class MoveTest extends LinearOpMode {
             backLeft.setPower(0);
             frontLeft.setPower(0);
             backRight.setPower(0);
-            frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-            sleep(500);
 
             frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         }
     }
     public void Intake() {

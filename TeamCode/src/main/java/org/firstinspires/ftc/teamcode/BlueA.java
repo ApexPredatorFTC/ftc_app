@@ -241,6 +241,8 @@ public class BlueA extends LinearOpMode {
             double yDist = Math.cos(direction) * distance;
             double xDist = Math.sin(direction)* distance;
 
+            resetEncoders();
+
             double ySpeed = Math.cos(direction) * speed;
             double xSpeed = Math.sin(direction)* speed;
 
