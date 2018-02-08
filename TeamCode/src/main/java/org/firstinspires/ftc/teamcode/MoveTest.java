@@ -31,6 +31,8 @@ import java.util.Locale;
  */
 @Autonomous
 public class MoveTest extends LinearOpMode {
+    private double errorTurn = 0;
+
     boolean on=true;
     BNO055IMU imu;
     DcMotor frontLeft;
@@ -196,7 +198,13 @@ public class MoveTest extends LinearOpMode {
             double ySpeed = Math.cos(direction) * speed;
             double xSpeed = Math.sin(direction)* speed;
 
-            double var = 1/Math.sqrt(2);
+            telemetry.addData("ySpeed", ySpeed);
+            telemetry.addData("xSpeed", xSpeed);
+            telemetry.update();
+
+            sleep(2500);
+
+            double var = 1/(Math.sqrt(2));
             double frontLeftDistOffset = -(var * xDist) - (var*yDist);
             double backLeftDistOffset = (var * xDist) - (var*yDist);
             double backRightDistOffset = (var * xDist) + (var*yDist);
@@ -224,13 +232,22 @@ public class MoveTest extends LinearOpMode {
 
                 // adjust relative speed based on heading error.
                 angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                double error = getError(0);
+                double error = getError(errorTurn);
                 double steer = getSteer(error, P_DRIVE_COEFF);
 
                 double frontLeftSpeed = -(var * xSpeed) - (var*ySpeed) -steer;
                 double backLeftSpeed = (var * xSpeed) - (var*ySpeed) - steer;
                 double backRightSpeed = (var * xSpeed) + (var*ySpeed) - steer;
                 double frontRightSpeed  = -(var * xSpeed) + (var*ySpeed) - steer;
+
+                telemetry.addData("frontLeft", frontLeftSpeed);
+                telemetry.addData("frontRight", frontRightSpeed);
+                telemetry.addData("backRight", backRightSpeed);
+                telemetry.addData("backLeft", backLeftSpeed);
+                telemetry.update();
+
+                sleep(2500);
+
 
                 // Normalize speeds if any one exceeds +/- 1.0;
                 double max1 = Math.max(Math.abs(frontLeftSpeed), Math.abs(frontRightSpeed));
@@ -257,7 +274,6 @@ public class MoveTest extends LinearOpMode {
                 telemetry.addData("Heading", angles.firstAngle);
                 telemetry.update();
 
-                idle();
             }
 
             // Stop all motion;
@@ -424,7 +440,7 @@ public class MoveTest extends LinearOpMode {
     public void GyroTurn(double degrees) {
         if (opModeIsActive()) {
 
-
+            errorTurn += degrees ;
 
             double turnError;
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);

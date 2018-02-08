@@ -23,9 +23,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuMarkInstanceId;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
-
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import java.util.Locale;
+
 /**
  * Created by Admin on 1/31/2018.
  */
@@ -64,10 +64,10 @@ public class BlueB extends LinearOpMode {
         rightSpin = hardwareMap.get(DcMotor.class, "rightSpin");
         leftSpin = hardwareMap.get(DcMotor.class, "leftSpin");
         // lifter = hardwareMap.get(DcMotor.class, "lifter");
-        ColorServo = hardwareMap.get(Servo.class, "ColorServo2");
-        DownServo = hardwareMap.get(Servo.class, "DownServo2");
-        sensorColor = hardwareMap.get(ColorSensor.class, "js2");
-        sensorDistance = hardwareMap.get(DistanceSensor.class, "js2");
+        ColorServo = hardwareMap.get(Servo.class, "ColorServo");
+        DownServo = hardwareMap.get(Servo.class, "DownServo");
+        sensorColor = hardwareMap.get(ColorSensor.class, "js");
+        sensorDistance = hardwareMap.get(DistanceSensor.class, "js");
         sensorColor.enableLed(false);
 
         frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -104,6 +104,7 @@ public class BlueB extends LinearOpMode {
 
         DownServo.setPosition(1);
         ColorServo.setPosition(0);
+
         relicTrackables.activate();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -158,52 +159,47 @@ public class BlueB extends LinearOpMode {
                     telemetry.addData("rZ", rZ);
 
                 }
-                if (vuMark != RelicRecoveryVuMark.CENTER) {
-                    Move(25, .5, 0);    //This moves it off the platform
+                if (vuMark == RelicRecoveryVuMark.CENTER) {
+                    Move(19, .4, 0);    //This moves it off the platform
                     sleep(500);
-                    GyroTurn(-91.5);
-                    sleep(500);
-                    Move(16, .2, 270);    //Move to the Crypto Box
-                    sleep(500);
-                    GyroTurn(91.5);
-                    sleep(500);
-                    Move(16,.2,0);
+                    Move (10, .4, 90);    //Move to the Crypto Box
+                    sleep(1000);
+                    Move(14,.4,0);
                     Outtake();
+                    sleep(2500);
+                    Move(5, .1, 180);  //Moves Back
+                    stopOuttake();
 
-                    Move(12, .5, 180);  //Moves Back
-                    sleep(500);
                     on = false;
-                }
-                if (vuMark != RelicRecoveryVuMark.LEFT) {
+                } else if (vuMark == RelicRecoveryVuMark.LEFT) {
                     //Left
-                    Move(25, .5, 0);    //This moves it off the platform
+                    Move(37, .4, 0);    //This moves it off the platform
                     sleep(500);
-                    GyroTurn(-91.5);
+                    GyroTurn(-90);
                     sleep(500);
-                    Move(24, .2, 90);    //Move to the Crypto Box
+                    Move(11.5, .2, 270);      //Move left
                     sleep(500);
-                    GyroTurn(91.5);
-                    sleep(500);
-                    Move(16,.2,0);
+                    Move(13.5, .1, 0);         //Moves to box
+                    sleep(1000);
                     Outtake();
-
-                    Move(12, .5, 180);  //Moves Back
+                    sleep(2500);
+                    Move(13.5, .1, 180);      //Moves Back
+                    stopOuttake();
                     sleep(500);
                     on = false;
-                }
-                if (vuMark != RelicRecoveryVuMark.RIGHT){
-                    Move(25, .5, 0);    //This moves it off the platform
+                } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
+                    Move(37, .4, 0);  //This moves it off the platform
                     sleep(500);
-                    GyroTurn(-91.5);
+                    GyroTurn(-90);
                     sleep(500);
-                    Move(8, .2, 270);    //Move to the Crypto Box
+                    Move(9, .2, 90);  // moves right
                     sleep(500);
-                    GyroTurn(91.5);
-                    sleep(500);
-                    Move(16,.2,0);
+                    Move(13.5, .05, 0); //moves toward box
+                    sleep(1000);
                     Outtake();
-
-                    Move(12, .5, 180);  //Moves Back
+                    sleep(2500);
+                    Move(10, .1, 180);  //Moves Back
+                    stopOuttake();
                     sleep(500);
                     on = false;
                 }
@@ -233,6 +229,8 @@ public class BlueB extends LinearOpMode {
             resetEncoders();
             double yDist = Math.cos(direction) * distance;
             double xDist = Math.sin(direction)* distance;
+
+            resetEncoders();
 
             double ySpeed = Math.cos(direction) * speed;
             double xSpeed = Math.sin(direction)* speed;
@@ -463,7 +461,7 @@ public class BlueB extends LinearOpMode {
 
     public void GyroTurn(double degrees) {
         if (opModeIsActive()) {
-
+            resetEncoders();
             double turnError;
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             degrees = degrees - angles.firstAngle;
@@ -521,6 +519,14 @@ public class BlueB extends LinearOpMode {
             backLeft.setPower(0);
             frontLeft.setPower(0);
             backRight.setPower(0);
+
+            frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+
         }
     }
     public void Intake() {
@@ -530,9 +536,8 @@ public class BlueB extends LinearOpMode {
     public void Outtake() {
         leftSpin.setPower(.4);
         rightSpin.setPower(-.4);
-
-        sleep(1000);
-
+    }
+    public void stopOuttake() {
         leftSpin.setPower(0);
         rightSpin.setPower(0);
     }
@@ -540,7 +545,7 @@ public class BlueB extends LinearOpMode {
 
         int blueValue = sensorColor.blue();
         int redValue = sensorColor.red();
-        sleep(2000);
+        sleep(1000);
         blueValue = sensorColor.blue();
         redValue = sensorColor.red();
         //composeTelemetry();
@@ -550,11 +555,11 @@ public class BlueB extends LinearOpMode {
 
         // Show the elapsed game time and wheel power.
         if(redValue > blueValue){
-            ColorServo.setPosition(.2);
+            ColorServo.setPosition(.7);
             sleep(500);//Forwards
         }
         else if (blueValue > redValue){
-            ColorServo.setPosition(.7);
+            ColorServo.setPosition(.2);
             sleep(500); //Backwards
 
         }
