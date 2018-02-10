@@ -124,7 +124,7 @@ public class RedB extends LinearOpMode {
 
         while (opModeIsActive() && on == true) {
             RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
-            ColorServoR.setPosition(.50);
+            ColorServoR.setPosition(.5);
             sleep(500);
             DownServoR.setPosition(.6);
             Sensor(true);
@@ -178,7 +178,7 @@ public class RedB extends LinearOpMode {
                     sleep(1000);
                     Move(14,.2,0);         //Yam the block
                     Outtake();
-                    sleep(2500);
+                    sleep(1500);
                     Move(5, .1, 180);  //Moves Back
                     stopOuttake();
 
@@ -193,20 +193,20 @@ public class RedB extends LinearOpMode {
                     sleep(1000);
                     Move(14,.2,0);          //Yam the block
                     Outtake();
-                    sleep(2500);
+                    sleep(1500);
                     Move(5, .1, 180);  //Moves Back
                     stopOuttake();
                     on = false;
                 } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
                     Move(20.5, .4, 0);    //This moves it off the platform
                     sleep(500);
-                    Move (10, .4, 90);    //Goes to center
+                    Move (10, .4, 270);    //Goes to center
                     sleep(1000);
-                    Move(9, .4, 90);      //Move Right
+                    Move(8.5, .4, 90);      //Move Right
                     sleep(1000);
                     Move(14,.2,0);          //Yam the block
                     Outtake();
-                    sleep(2500);
+                    sleep(1500);
                     Move(5, .1, 180);  //Moves Back
                     stopOuttake();
                     on = false;

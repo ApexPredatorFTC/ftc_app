@@ -178,14 +178,14 @@ public class BlueA extends LinearOpMode {
                 }
                 if (vuMark == RelicRecoveryVuMark.CENTER) {
                     Move(37, .4, 0);    //This moves it off the platform
-
+                    sleep(500);
                     GyroTurn(-90);
-
-                    Move(13.5, .1, 0);    //Move to the Crypto Box
+                    sleep(500);
+                    Move(13, .1, 0);    //Move to the Crypto Box
 
                     Outtake();
-                    sleep(2500);
-                    Move(13.5, .1, 180);  //Moves Back
+                    sleep(1500);
+                    Move(9, .1, 180);  //Moves Back
                     stopOuttake();
 
                     on = false;
@@ -195,13 +195,13 @@ public class BlueA extends LinearOpMode {
                     sleep(500);
                     GyroTurn(-90);
                     sleep(500);
-                    Move(11.5, .2, 270);      //Move left
+                    Move(9, .2, 270);      //Move left
                     sleep(500);
-                    Move(13.5, .1, 0);         //Moves to box
+                    Move(13, .1, 0);         //Moves to box
                     sleep(1000);
                     Outtake();
-                    sleep(2500);
-                    Move(13.5, .1, 180);      //Moves Back
+                    sleep(1500);
+                    Move(9, .1, 180);      //Moves Back
                     stopOuttake();
                     sleep(500);
                     on = false;
@@ -212,14 +212,28 @@ public class BlueA extends LinearOpMode {
                     sleep(500);
                     Move(9, .2, 90);  // moves right
                     sleep(500);
-                    Move(13.5, .05, 0); //moves toward box
+                    Move(13, .05, 0); //moves toward box
                     sleep(1000);
                     Outtake();
-                    sleep(2500);
-                    Move(10, .1, 180);  //Moves Back
+                    sleep(1500);
+                    Move(9, .1, 180);  //Moves Back
                     stopOuttake();
                     sleep(500);
                     on = false;
+
+                }
+
+                else{
+                    Move(37, .4, 0);    //This moves it off the platform
+                    sleep(500);
+                    GyroTurn(-90);
+                    sleep(500);
+                    Move(13, .1, 0);    //Move to the Crypto Box
+
+                    Outtake();
+                    sleep(1500);
+                    Move(9, .1, 180);  //Moves Back
+                    stopOuttake();
                 }
             }
         }
@@ -577,7 +591,8 @@ public class BlueA extends LinearOpMode {
 
             if (color) {
                 if (redValue < blueValue) {
-                    ColorServo.setPosition(.7);
+                    ColorServo.setPosition(.8);
+
                     sleep(500);//Forwards
                 } else if (blueValue < redValue) {
                     ColorServo.setPosition(.2);

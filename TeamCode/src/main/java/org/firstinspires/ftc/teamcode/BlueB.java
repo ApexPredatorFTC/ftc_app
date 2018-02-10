@@ -172,7 +172,7 @@ public class BlueB extends LinearOpMode {
 
                 }
                 if (vuMark == RelicRecoveryVuMark.CENTER) {
-                    Move(20.5, .4, 0);    //This moves it off the platform
+                    Move(23, .4, 0);    //This moves it off the platform
                     sleep(500);
                     Move (10, .4, 90);    //Move to the Crypto Box
                     sleep(1000);
@@ -185,7 +185,7 @@ public class BlueB extends LinearOpMode {
                     on = false;
                 } else if (vuMark == RelicRecoveryVuMark.LEFT) {
                     //Left
-                    Move(20.5, .4, 0);    //This moves it off the platform
+                    Move(23, .4, 0);    //This moves it off the platform
                     sleep(500);
                     Move (10, .4, 90);    //Move to the Crypto Box
                     sleep(1000);
@@ -198,7 +198,7 @@ public class BlueB extends LinearOpMode {
                     stopOuttake();
                     on = false;
                 } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
-                    Move(20.5, .4, 0);    //This moves it off the platform
+                    Move(23, .4, 0);    //This moves it off the platform
                     sleep(500);
                     Move (10, .4, 90);    //Move to the Crypto Box
                     sleep(1000);
