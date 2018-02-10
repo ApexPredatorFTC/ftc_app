@@ -28,6 +28,10 @@ public class OmniTeleOP extends LinearOpMode{
     Servo ColorServo;
     ColorSensor sensorColor;
     DistanceSensor sensorDistance;
+    Servo DownServoR;
+    Servo ColorServoR;
+    ColorSensor sensorColorR;
+    DistanceSensor sensorDistanceR;
 
     int liftLock = 0;
 
@@ -47,6 +51,9 @@ public class OmniTeleOP extends LinearOpMode{
         frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        ColorServoR = hardwareMap.get(Servo.class, "ColorServo2");
+        sensorColorR = hardwareMap.get(ColorSensor.class, "js2");
+        DownServoR = hardwareMap.get(Servo.class, "DownServo2");
 
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -54,19 +61,22 @@ public class OmniTeleOP extends LinearOpMode{
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lifter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        DownServo.setPosition(1);
+        DownServo.setPosition(.67);
         ColorServo.setPosition(0);
+        DownServoR.setPosition(.2);
+        ColorServoR.setPosition(1);
+
         sensorColor.enableLed(false);
         waitForStart();
 
         while(opModeIsActive()){
             //Scaling the joystick inputs for sensitivity
-            float y_raw = gamepad1.left_stick_y* .8f;
-            float x_raw = gamepad1.left_stick_x* .8f;
-            float z_raw = gamepad1.right_stick_x;
-            float xscale = (float) 0.85;
-            float yscale = (float) 0.85;
-            float zscale = (float) 0.85;
+            float y_raw = gamepad1.left_stick_y* .9f;
+            float x_raw = gamepad1.left_stick_x* .9f;
+            float z_raw = gamepad1.right_stick_x * 0.85f;
+            float xscale = (float) 0.75;
+            float yscale = (float) 0.75;
+            float zscale = (float) 0.65;
             float x = -(xscale*(float)Math.pow(x_raw, 7.0) + (1-xscale)*x_raw);
             float y = yscale*(float)Math.pow(y_raw, 7.0) + (1-yscale)*y_raw;
              float z = -(zscale*(float)Math.pow(z_raw, 7.0) + (1-zscale)*z_raw);

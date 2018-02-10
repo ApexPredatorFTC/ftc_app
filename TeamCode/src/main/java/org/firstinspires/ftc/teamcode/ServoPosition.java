@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Color;
+
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -29,8 +31,8 @@ import java.util.Locale;
 /**
  * Created by Admin on 1/31/2018.
  */
-@Autonomous
-public class RedA extends LinearOpMode {
+@TeleOp
+public class ServoPosition extends LinearOpMode {
     private double errorTurn = 0;
 
     boolean on=true;
@@ -61,6 +63,11 @@ public class RedA extends LinearOpMode {
     static final double P_DRIVE_COEFF = .01;
     static final double HEADING_THRESHOLD = 1;      // As tight as we can make it with an integer gyro
     static final double P_TURN_COEFF = 0.008;
+
+    private double Rpos=0;
+    private double Rpos2=0;
+    private double pos=0;
+    private double pos2=0;
     @Override public void runOpMode() {
         frontLeft = hardwareMap.dcMotor.get("frontLeft");
         backLeft = hardwareMap.dcMotor.get("backLeft");
@@ -77,7 +84,6 @@ public class RedA extends LinearOpMode {
         sensorDistanceR = hardwareMap.get(DistanceSensor.class, "js2");
         ColorServoR = hardwareMap.get(Servo.class, "ColorServo2");
         DownServoR = hardwareMap.get(Servo.class, "DownServo2");
-        sensorColor.enableLed(false);
 
         frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -110,114 +116,89 @@ public class RedA extends LinearOpMode {
         VuforiaTrackable relicTemplate = relicTrackables.get(0);
         relicTemplate.setName("relicVuMarkTemplate");
         //composeTelemetry();
+
         DownServo.setPosition(1);
         ColorServo.setPosition(0);
-        DownServoR.setPosition(.2);
+        DownServoR.setPosition(1);
         ColorServoR.setPosition(0);
-
         relicTrackables.activate();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+
         waitForStart();
 
         while (opModeIsActive() && on == true) {
-            RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
-            ColorServoR.setPosition(.5);
-            sleep(500);
-            DownServoR.setPosition(.6);
-            Sensor(true);
-            sleep(2000);
-            DownServoR.setPosition(.2);
-            sleep(500);
-            ColorServoR.setPosition(0);
-            if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
+            DownServoR.setPosition(Rpos);
+            ColorServoR.setPosition(Rpos2);
+            DownServo.setPosition(pos);
+            ColorServo.setPosition(pos2);
 
+            telemetry.addData("DownServoR", Rpos);
+            telemetry.addData("ColorServoR", Rpos2);
+            telemetry.addData("DownServo", pos);
+            telemetry.addData("ColorServo", pos2);
+            telemetry.update();
 
-                /* Found an instance of the template. In the actual game, you will probably
-                 * loop until this condition occurs, then move on to act accordingly depending
-                 * on which VuMark was visible. */
-                telemetry.addData("VuMark", "%s visible", vuMark);
-
-                /* For fun, we also exhibit the navigational pose. In the Relic Recovery game,
-                 * it is perhaps unlikely that you will actually need to act on this pose information, but
-                 * we illustrate it nevertheless, for completeness. */
-                OpenGLMatrix pose = ((VuforiaTrackableDefaultListener) relicTemplate.getListener()).getPose();
-                telemetry.addData("Pose", pose);
-
-                /* We further illustrate how to decompose the pose into useful rotational and
-                 * translational components */
-                if (pose != null) {
-                    VectorF trans = pose.getTranslation();
-                    Orientation rot = Orientation.getOrientation(pose, AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
-
-                    // Extract the X, Y, and Z components of the offset of the target relative to the robot
-                    double tX = trans.get(0);
-                    double tY = trans.get(1);
-                    double tZ = trans.get(2);
-
-                    // Extract the rotational components of the target relative to the robot
-                    double rX = rot.firstAngle;
-                    double rY = rot.secondAngle;
-                    double rZ = rot.thirdAngle;
-
-                    telemetry.addData("tX", tX);
-                    telemetry.addData("tY", tY);
-                    telemetry.addData("tZ", tZ);
-
-                    telemetry.addData("rX", rX);
-                    telemetry.addData("rY", rY);
-                    telemetry.addData("rZ", rZ);
-
-                }
-                if (vuMark == RelicRecoveryVuMark.CENTER) {
-                    Move(35.5, .4, 0);    //This moves it off the platform
-                    sleep(500);
-                    GyroTurn(90);
-                    sleep(500);
-                    Move(13.5, .1, 0);    //Move to the Crypto Box
-
-                    Outtake();
-                    sleep(1500);
-                    Move(10, .1, 180);  //Moves Back
-                    stopOuttake();
-
-                    on = false;
-                } else if (vuMark == RelicRecoveryVuMark.LEFT) {
-                    //Left
-                    Move(35.5, .4, 0);    //This moves it off the platform
-                    sleep(500);
-                    GyroTurn(90);
-                    sleep(500);
-                    Move(8, .2, 270);      //Move left
-                    sleep(500);
-                    Move(13.5, .1, 0);         //Moves to box
-                    sleep(1000);
-                    Outtake();
-                    sleep(1500);
-                    Move(10, .1, 180);      //Moves Back
-                    stopOuttake();
-                    sleep(500);
-                    on = false;
-                } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
-                    Move(35.5, .4, 0);  //This moves it off the platform
-                    sleep(500);
-                    GyroTurn(90);
-                    sleep(500);
-                    Move(9, .2, 90);  // moves right
-                    sleep(500);
-                    Move(13.5, .1, 0); //moves toward box
-                    sleep(1000);
-                    Outtake();
-                    sleep(1500);
-                    Move(10, .1, 180);  //Moves Back
-                    stopOuttake();
-                    sleep(500);
-                    on = false;
-                }
+            if(gamepad1.dpad_up){
+                Rpos+=.001;
             }
-        }
-    }
-    //Grab the angle error
+            else if(gamepad1.dpad_down){
+                Rpos-=.001;
+            }
+            if(gamepad1.dpad_right  ){
+                Rpos2+=.001;
+            }
+            else if(gamepad1.dpad_left){
+                Rpos2-=.001;
+            }
+            if(gamepad1.y){
+                pos+=.001;
+            }
+            else if(gamepad1.a){
+                pos-=.001;
+            }
+
+            if(gamepad1.x){
+                pos2+=.001;
+            }
+            else if(gamepad1.b){
+                pos-=.001;
+            }
+
+            if(Rpos > 1){
+                Rpos = 1;
+            }
+
+            if(Rpos < 0){
+                Rpos = 0;
+            }
+
+            if(Rpos2 > 1){
+                Rpos2 = 1;
+            }
+
+            if(Rpos2 < 0){
+                Rpos2 = 0;
+            }
+
+            if(pos > 1){
+                pos = 1;
+            }
+
+            if(pos < 0){
+                pos2 = 0;
+            }
+
+            if(pos2 > 1){
+                pos2 = 1;
+            }
+
+            if(pos2 < 0){
+                pos2 = 0
+                ;
+            }
+
+        }}
     public double getError(double targetAngle) {
 
         double robotError;
@@ -228,17 +209,17 @@ public class RedA extends LinearOpMode {
         while (robotError <= -180) robotError += 360;
         return robotError;
     }
-    //Scales the error to a motor speed correction
+
     public double getSteer(double error, double PCoeff) {
         return Range.clip(error * PCoeff, -1, 1);
     }
 
     public void Move(double distance, double speed, double direction) {
         if (opModeIsActive()) {
-            direction = direction * Math.PI / 180; //Sets Direction
+            direction = direction * Math.PI / 180;
 
             //Reset Encoder Counts 0
-            resetEncoders();                                //Finds initial speed of motors
+            resetEncoders();
             double yDist = Math.cos(direction) * distance;
             double xDist = Math.sin(direction)* distance;
 
@@ -247,7 +228,6 @@ public class RedA extends LinearOpMode {
             double ySpeed = Math.cos(direction) * speed;
             double xSpeed = Math.sin(direction)* speed;
 
-            //Starts the proportional feedback loop
             double var = 1/Math.sqrt(2);
             double frontLeftDistOffset = -(var * xDist) - (var*yDist);
             double backLeftDistOffset = (var * xDist) - (var*yDist);
@@ -555,29 +535,27 @@ public class RedA extends LinearOpMode {
         leftSpin.setPower(0);
         rightSpin.setPower(0);
     }
-    public void Sensor (boolean color){
+    public void Sensor() {
         sleep(500);
-        int blueValue = sensorColorR.blue();
-        int redValue = sensorColorR.red();
+        int blueValue = sensorColor.blue();
+        int redValue = sensorColor.red();
         sleep(1000);
-        blueValue = sensorColorR.blue();
-        redValue = sensorColorR.red();
+        blueValue = sensorColor.blue();
+        redValue = sensorColor.red();
         //composeTelemetry();
         telemetry.addData("Blue: ", blueValue);
         telemetry.addData("Red: ", redValue);
         telemetry.update();
 
         // Show the elapsed game time and wheel power.
+        if(redValue > blueValue){
+            ColorServo.setPosition(.7);
+            sleep(500);//Forwards
+        }
+        else if (blueValue > redValue){
+            ColorServo.setPosition(.2);
+            sleep(500); //Backwards
 
-        if (color) {
-            if (redValue < blueValue) {
-                ColorServoR.setPosition(.7);
-                sleep(500);//Forwards
-            } else if (blueValue < redValue) {
-                ColorServoR.setPosition(.2);
-                sleep(500); //Backwards
-
-            }
         }
     }
     public void DropTheServo(){

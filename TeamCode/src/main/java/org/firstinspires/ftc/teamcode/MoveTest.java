@@ -202,7 +202,7 @@ public class MoveTest extends LinearOpMode {
             telemetry.addData("xSpeed", xSpeed);
             telemetry.update();
 
-            sleep(2500);
+
 
             double var = 1/(Math.sqrt(2));
             double frontLeftDistOffset = -(var * xDist) - (var*yDist);
@@ -246,7 +246,7 @@ public class MoveTest extends LinearOpMode {
                 telemetry.addData("backLeft", backLeftSpeed);
                 telemetry.update();
 
-                sleep(2500);
+
 
 
                 // Normalize speeds if any one exceeds +/- 1.0;

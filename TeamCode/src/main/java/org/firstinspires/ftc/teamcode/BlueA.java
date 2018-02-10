@@ -31,6 +31,8 @@ import java.util.Locale;
  */
 @Autonomous
 public class BlueA extends LinearOpMode {
+    private double errorTurn = 0;
+
     boolean on=true;
     BNO055IMU imu;
     DcMotor frontLeft;
@@ -46,7 +48,10 @@ public class BlueA extends LinearOpMode {
     DistanceSensor sensorDistance;
     Servo ColorServo;
     Servo DownServo;
-
+    ColorSensor sensorColorR;
+    DistanceSensor sensorDistanceR;
+    Servo ColorServoR;
+    Servo DownServoR;
     public static final String TAG = "Vuforia VuMark Sample";
 
     OpenGLMatrix lastLocation = null;
@@ -68,6 +73,10 @@ public class BlueA extends LinearOpMode {
         DownServo = hardwareMap.get(Servo.class, "DownServo");
         sensorColor = hardwareMap.get(ColorSensor.class, "js");
         sensorDistance = hardwareMap.get(DistanceSensor.class, "js");
+        sensorColorR = hardwareMap.get(ColorSensor.class, "js2");
+        sensorDistanceR = hardwareMap.get(DistanceSensor.class, "js2");
+        ColorServoR = hardwareMap.get(Servo.class, "ColorServo2");
+        DownServoR = hardwareMap.get(Servo.class, "DownServo2");
         sensorColor.enableLed(false);
 
         frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -108,24 +117,22 @@ public class BlueA extends LinearOpMode {
         relicTrackables.activate();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+        DownServo.setPosition(1);
+        ColorServo.setPosition(0);
+        DownServoR.setPosition(.2);
+        ColorServoR.setPosition(1);
+        relicTrackables.activate();
+        telemetry.addData("Status", "Initialized");
+        telemetry.update();
         waitForStart();
 
         while (opModeIsActive() && on == true) {
-            ColorServo.setPosition(0);
-            sleep(500);
-            ColorServo.setPosition(1);
-            sleep(500);
-            ColorServo.setPosition(0);
-            sleep(500);
-            ColorServo.setPosition(1);
-            sleep(500);
-            ColorServo.setPosition(0);
-            sleep(500);
             RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
-            ColorServo.setPosition(.30);
-            sleep(500);
+            ColorServo.setPosition(.50);
+            sleep(1000);
             DownServo.setPosition(.3);
-            Sensor();
+            sleep(1000);
+            Sensor(true);
             sleep(2000);
             DownServo.setPosition(.8);
             sleep(500);
@@ -274,7 +281,7 @@ public class BlueA extends LinearOpMode {
 
                 // adjust relative speed based on heading error.
                 angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                double error = getError(0);
+                double error = getError(errorTurn);
                 double steer = getSteer(error, P_DRIVE_COEFF);
 
                 double frontLeftSpeed = -(var * xSpeed) - (var*ySpeed) -steer;
@@ -472,7 +479,9 @@ public class BlueA extends LinearOpMode {
 
     public void GyroTurn(double degrees) {
         if (opModeIsActive()) {
-            resetEncoders();
+
+            errorTurn += degrees ;
+
             double turnError;
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             degrees = degrees - angles.firstAngle;
@@ -531,12 +540,11 @@ public class BlueA extends LinearOpMode {
             frontLeft.setPower(0);
             backRight.setPower(0);
 
+
             frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-
 
         }
     }
@@ -552,29 +560,33 @@ public class BlueA extends LinearOpMode {
         leftSpin.setPower(0);
         rightSpin.setPower(0);
     }
-    public void Sensor() {
 
-        int blueValue = sensorColor.blue();
-        int redValue = sensorColor.red();
-        sleep(1000);
-        blueValue = sensorColor.blue();
-         redValue = sensorColor.red();
-        //composeTelemetry();
-        telemetry.addData("Blue: ", blueValue);
-        telemetry.addData("Red: ", redValue);
-        telemetry.update();
+        public void Sensor (boolean color) {
+            sleep(500);
+            int blueValue = sensorColor.blue();
+            int redValue = sensorColor.red();
+            sleep(1000);
+            blueValue = sensorColor.blue();
+            redValue = sensorColor.red();
+            //composeTelemetry();
+            telemetry.addData("Blue: ", blueValue);
+            telemetry.addData("Red: ", redValue);
+            telemetry.update();
 
-        // Show the elapsed game time and wheel power.
-        if(redValue > blueValue){
-            ColorServo.setPosition(.7);
-            sleep(500);//Forwards
+            // Show the elapsed game time and wheel power.
+
+            if (color) {
+                if (redValue < blueValue) {
+                    ColorServo.setPosition(.7);
+                    sleep(500);//Forwards
+                } else if (blueValue < redValue) {
+                    ColorServo.setPosition(.2);
+                    sleep(500); //Backwards
+
+                }
+            }
         }
-        else if (blueValue > redValue){
-            ColorServo.setPosition(.2);
-            sleep(500); //Backwards
 
-        }
-    }
     public void DropTheServo(){
         DownServo.setPosition(1);
     }

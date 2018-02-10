@@ -23,14 +23,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuMarkInstanceId;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
-
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import java.util.Locale;
+
 /**
  * Created by Admin on 1/31/2018.
  */
 @Autonomous
 public class RedB extends LinearOpMode {
+    private double errorTurn = 0;
+
     boolean on=true;
     BNO055IMU imu;
     DcMotor frontLeft;
@@ -46,6 +48,10 @@ public class RedB extends LinearOpMode {
     DistanceSensor sensorDistance;
     Servo ColorServo;
     Servo DownServo;
+    ColorSensor sensorColorR;
+    DistanceSensor sensorDistanceR;
+    Servo ColorServoR;
+    Servo DownServoR;
 
     public static final String TAG = "Vuforia VuMark Sample";
 
@@ -64,10 +70,14 @@ public class RedB extends LinearOpMode {
         rightSpin = hardwareMap.get(DcMotor.class, "rightSpin");
         leftSpin = hardwareMap.get(DcMotor.class, "leftSpin");
         // lifter = hardwareMap.get(DcMotor.class, "lifter");
-        ColorServo = hardwareMap.get(Servo.class, "ColorServo2");
-        DownServo = hardwareMap.get(Servo.class, "DownServo2");
-        sensorColor = hardwareMap.get(ColorSensor.class, "js2");
-        sensorDistance = hardwareMap.get(DistanceSensor.class, "js2");
+        ColorServo = hardwareMap.get(Servo.class, "ColorServo");
+        DownServo = hardwareMap.get(Servo.class, "DownServo");
+        sensorColor = hardwareMap.get(ColorSensor.class, "js");
+        sensorDistance = hardwareMap.get(DistanceSensor.class, "js");
+        sensorColorR = hardwareMap.get(ColorSensor.class, "js2");
+        sensorDistanceR = hardwareMap.get(DistanceSensor.class, "js2");
+        ColorServoR = hardwareMap.get(Servo.class, "ColorServo2");
+        DownServoR = hardwareMap.get(Servo.class, "DownServo2");
         sensorColor.enableLed(false);
 
         frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -102,8 +112,11 @@ public class RedB extends LinearOpMode {
         relicTemplate.setName("relicVuMarkTemplate");
         //composeTelemetry();
 
-        DownServo.setPosition(.2);      //Straight up in the air
-        ColorServo.setPosition(.1);
+        DownServo.setPosition(1);
+        ColorServo.setPosition(0);
+        DownServoR.setPosition(.2);
+        ColorServoR.setPosition(0);
+
         relicTrackables.activate();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -111,15 +124,14 @@ public class RedB extends LinearOpMode {
 
         while (opModeIsActive() && on == true) {
             RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
-            ColorServo.setPosition(.6);
+            ColorServoR.setPosition(.50);
             sleep(500);
-            DownServo.setPosition(.6);
-            sleep(1000);
-            Sensor();
+            DownServoR.setPosition(.6);
+            Sensor(true);
             sleep(2000);
-            DownServo.setPosition(.2);
+            DownServoR.setPosition(.2);
             sleep(500);
-            ColorServo.setPosition(.2);
+            ColorServoR.setPosition(0);
             if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
 
 
@@ -159,53 +171,44 @@ public class RedB extends LinearOpMode {
                     telemetry.addData("rZ", rZ);
 
                 }
-                if (vuMark != RelicRecoveryVuMark.CENTER) {
-                    Move(25, .5, 0);    //This moves it off the platform
+                if (vuMark == RelicRecoveryVuMark.CENTER) {
+                    Move(20.5, .4, 0);    //This moves it off the platform
                     sleep(500);
-                    GyroTurn(-91.5);
-                    sleep(500);
-                    Move(16, .2, 270);    //Move to the Crypto Box
-                    sleep(500);
-                    GyroTurn(91.5);
-                    sleep(500);
-                    Move(16,.2,0);
+                    Move (10, .4, 270);    //Move to the Center
+                    sleep(1000);
+                    Move(14,.2,0);         //Yam the block
                     Outtake();
+                    sleep(2500);
+                    Move(5, .1, 180);  //Moves Back
+                    stopOuttake();
 
-                    Move(12, .5, 180);  //Moves Back
-                    sleep(500);
                     on = false;
-                }
-                if (vuMark != RelicRecoveryVuMark.LEFT) {
+                } else if (vuMark == RelicRecoveryVuMark.LEFT) {
                     //Left
-                    Move(25, .5, 0);    //This moves it off the platform
+                    Move(20.5, .4, 0);    //This moves it off the platform
                     sleep(500);
-                    GyroTurn(-91.5);
-                    sleep(500);
-                    Move(24, .2, 270);    //Move to the Crypto Box
-                    sleep(500);
-                    GyroTurn(91.5);
-                    sleep(500);
-                    Move(16,.2,0);
+                    Move (10, .4, 270);    //Goes to center
+                    sleep(1000);
+                    Move(7.5, .4, 270);      //Move left
+                    sleep(1000);
+                    Move(14,.2,0);          //Yam the block
                     Outtake();
-
-                    Move(12, .5, 180);  //Moves Back
-                    sleep(500);
+                    sleep(2500);
+                    Move(5, .1, 180);  //Moves Back
+                    stopOuttake();
                     on = false;
-                }
-                if (vuMark != RelicRecoveryVuMark.RIGHT){
-                    Move(25, .5, 0);    //This moves it off the platform
+                } else if (vuMark == RelicRecoveryVuMark.RIGHT) {
+                    Move(20.5, .4, 0);    //This moves it off the platform
                     sleep(500);
-                    GyroTurn(-91.5);
-                    sleep(500);
-                    Move(8, .2, 90);    //Move to the Crypto Box
-                    sleep(500);
-                    GyroTurn(91.5);
-                    sleep(500);
-                    Move(16,.2,0);
+                    Move (10, .4, 90);    //Goes to center
+                    sleep(1000);
+                    Move(9, .4, 90);      //Move Right
+                    sleep(1000);
+                    Move(14,.2,0);          //Yam the block
                     Outtake();
-
-                    Move(12, .5, 180);  //Moves Back
-                    sleep(500);
+                    sleep(2500);
+                    Move(5, .1, 180);  //Moves Back
+                    stopOuttake();
                     on = false;
                 }
             }
@@ -234,6 +237,8 @@ public class RedB extends LinearOpMode {
             resetEncoders();
             double yDist = Math.cos(direction) * distance;
             double xDist = Math.sin(direction)* distance;
+
+            resetEncoders();
 
             double ySpeed = Math.cos(direction) * speed;
             double xSpeed = Math.sin(direction)* speed;
@@ -266,7 +271,7 @@ public class RedB extends LinearOpMode {
 
                 // adjust relative speed based on heading error.
                 angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                double error = getError(0);
+                double error = getError(errorTurn);
                 double steer = getSteer(error, P_DRIVE_COEFF);
 
                 double frontLeftSpeed = -(var * xSpeed) - (var*ySpeed) -steer;
@@ -465,6 +470,8 @@ public class RedB extends LinearOpMode {
     public void GyroTurn(double degrees) {
         if (opModeIsActive()) {
 
+            errorTurn += degrees ;
+
             double turnError;
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             degrees = degrees - angles.firstAngle;
@@ -522,6 +529,13 @@ public class RedB extends LinearOpMode {
             backLeft.setPower(0);
             frontLeft.setPower(0);
             backRight.setPower(0);
+
+
+            frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         }
     }
     public void Intake() {
@@ -531,34 +545,34 @@ public class RedB extends LinearOpMode {
     public void Outtake() {
         leftSpin.setPower(.4);
         rightSpin.setPower(-.4);
-
-        sleep(1000);
-
+    }
+    public void stopOuttake() {
         leftSpin.setPower(0);
         rightSpin.setPower(0);
     }
-    public void Sensor() {
-
-        int blueValue = sensorColor.blue();
-        int redValue = sensorColor.red();
-        sleep(2000);
-        blueValue = sensorColor.blue();
-        redValue = sensorColor.red();
-        sleep(2000);
+    public void Sensor (boolean color) {
+        sleep(500);
+        int blueValue = sensorColorR.blue();
+        int redValue = sensorColorR.red();
+        sleep(1000);
+        blueValue = sensorColorR.blue();
+        redValue = sensorColorR.red();
         //composeTelemetry();
         telemetry.addData("Blue: ", blueValue);
         telemetry.addData("Red: ", redValue);
         telemetry.update();
 
         // Show the elapsed game time and wheel power.
-        if(redValue > blueValue){
-            ColorServo.setPosition(.2);
-            sleep(500);//Forwards
-        }
-        else if (blueValue > redValue){
-            ColorServo.setPosition(.7);
-            sleep(500); //Backwards
 
+        if (color) {
+            if (redValue < blueValue) {
+                ColorServoR.setPosition(.7);
+                sleep(500);//Forwards
+            } else if (blueValue < redValue) {
+                ColorServoR.setPosition(.2);
+                sleep(500); //Backwards
+
+            }
         }
     }
     public void DropTheServo(){
